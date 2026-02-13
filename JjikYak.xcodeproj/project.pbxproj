@@ -14,8 +14,7 @@
 		C6735D842F3EECDA0025FA25 /* Exceptions for "JjikYak" folder in "JjikYak" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"/Localized: Main.storyboard",
-				Info.plist,
+				App/Info.plist,
 			);
 			target = C6735BE82F3EDB060025FA25 /* JjikYak */;
 		};
