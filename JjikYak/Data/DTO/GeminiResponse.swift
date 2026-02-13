@@ -1,7 +1,17 @@
-//
-//  Untitled.swift
-//  JjikYak
-//
-//  Created by Charlie_Kang on 2/14/26.
-//
+import Foundation
 
+struct GeminiResponse: Decodable {
+    let candidates: [Candidate]
+}
+
+struct Candidate: Decodable {
+    let content: Content
+}
+
+struct Content: Decodable {
+    let parts: [Part]
+}
+
+struct Part: Decodable {
+    let text: String
+}
