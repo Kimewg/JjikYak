@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		F63CA7882F3F661500C0C1F2 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = F63CA7872F3F661500C0C1F2 /* Moya */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		C6735BE92F3EDB060025FA25 /* JjikYak.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JjikYak.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F63CA7882F3F661500C0C1F2 /* Moya in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = JjikYak;
 			packageProductDependencies = (
+				F63CA7872F3F661500C0C1F2 /* Moya */,
 			);
 			productName = JjikYak;
 			productReference = C6735BE92F3EDB060025FA25 /* JjikYak.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = C6735BE02F3EDB060025FA25;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F63CA7862F3F661500C0C1F2 /* XCRemoteSwiftPackageReference "Moya" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C6735BEA2F3EDB060025FA25 /* Products */;
 			projectDirPath = "";
@@ -333,6 +342,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F63CA7862F3F661500C0C1F2 /* XCRemoteSwiftPackageReference "Moya" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Moya/Moya.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 15.0.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F63CA7872F3F661500C0C1F2 /* Moya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F63CA7862F3F661500C0C1F2 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = Moya;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C6735BE12F3EDB060025FA25 /* Project object */;
 }

@@ -1,5 +1,6 @@
 import Foundation
 
+//API Key를 편리하게 가져오기 위한 파일
 struct ConfigManager {
     static var geminiAPIKey: String {
         guard let path = Bundle.main.path(forResource: "Secrets", ofType: "plist"),
