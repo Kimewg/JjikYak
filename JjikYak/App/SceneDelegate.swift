@@ -18,7 +18,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let testVC = UIViewController()
         testVC.view.backgroundColor = .white
         
+        
+        
         print("API키 확인 : \(ConfigManager.geminiAPIKey)")
+        
+        let testService = GeminiService()
+        testService.parsePillInfo(ocrText: "타이레놀 8시간 이알 서방정") { result in
+            switch result {
+            case .success(let parsedResult):
+                print("✅ [AI 분석 성공] \n\(parsedResult)")
+            case .failure(let error):
+                print("❌ [AI 분석 실패] \(error.localizedDescription)")
+            }
+        }
         
         window.rootViewController = testVC
         
