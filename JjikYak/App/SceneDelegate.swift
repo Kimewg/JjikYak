@@ -15,7 +15,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         
-        window.rootViewController = ViewController()
+        let testVC = UIViewController()
+        testVC.view.backgroundColor = .white
+        
+        print("API키 확인 : \(ConfigManager.geminiAPIKey)")
+        
+        window.rootViewController = testVC
         
         window.makeKeyAndVisible()
         self.window = window
