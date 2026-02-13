@@ -11,9 +11,10 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C6735BFE2F3EDB070025FA25 /* Exceptions for "JjikYak" folder in "JjikYak" target */ = {
+		C6735D842F3EECDA0025FA25 /* Exceptions for "JjikYak" folder in "JjikYak" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"/Localized: Main.storyboard",
 				Info.plist,
 			);
 			target = C6735BE82F3EDB060025FA25 /* JjikYak */;
@@ -24,7 +25,7 @@
 		C6735BEB2F3EDB060025FA25 /* JjikYak */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C6735BFE2F3EDB070025FA25 /* Exceptions for "JjikYak" folder in "JjikYak" target */,
+				C6735D842F3EECDA0025FA25 /* Exceptions for "JjikYak" folder in "JjikYak" target */,
 			);
 			path = JjikYak;
 			sourceTree = "<group>";
@@ -149,7 +150,6 @@
 				INFOPLIST_FILE = JjikYak/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -176,7 +176,6 @@
 				INFOPLIST_FILE = JjikYak/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
