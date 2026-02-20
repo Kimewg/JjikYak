@@ -24,10 +24,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         print("API키 확인 : \(ConfigManager.geminiAPIKey)")
         
         let testService = GeminiService()
-        testService.parsePillInfo(ocrText: "타이레놀 8시간 이알 서방정") { result in
+        testService.parsePillInfo(ocrText: "타이레놀 8시간 이알 서방정, 식후 30분 복용") { result in
             switch result {
-            case .success(let parsedResult):
-                print("✅ [AI 분석 성공] \n\(parsedResult)")
+            case .success(let pill):
+                // ✨ 이제 pill은 단순 텍스트가 아니라 PillInfo 객체입니다!
+                print("✅ [AI 파싱 성공]")
+                print("💊 약 이름: \(pill.pillName)")
+                print("🕒 복용법: \(pill.dosage)")
+                print("✨ 효능: \(pill.efficacy)")
             case .failure(let error):
                 print("❌ [AI 분석 실패] \(error.localizedDescription)")
             }
