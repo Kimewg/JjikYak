@@ -16,10 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         
-        let testVC = UIViewController()
-        testVC.view.backgroundColor = .white
-        
-        
+        let tabBar = TabBarController()
         
         print("API키 확인 : \(ConfigManager.geminiAPIKey)")
         
@@ -33,8 +30,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
         }
         
-        window.rootViewController = testVC
-        
+        window.rootViewController = tabBar
         window.makeKeyAndVisible()
         self.window = window
     }
