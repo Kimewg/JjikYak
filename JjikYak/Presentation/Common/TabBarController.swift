@@ -17,7 +17,7 @@ class TabBarController: UITabBarController {
         let toDayDoseVC = TodayDoseViewController()
         let historyVC = HistoryViewController()
         let todayNav = UINavigationController(rootViewController: toDayDoseVC)
-        
+        let historyNav = UINavigationController(rootViewController: historyVC)
         toDayDoseVC.tabBarItem = UITabBarItem(
             title: "오늘",
             image: UIImage(systemName: "house"),
@@ -30,7 +30,7 @@ class TabBarController: UITabBarController {
             selectedImage: UIImage(systemName: "calendar.fill")
         )
         
-        viewControllers = [toDayDoseVC, historyVC]
+        viewControllers = [todayNav, historyNav]
     }
     private func setUp() {
         tabBar.layer.borderWidth = 0.5
