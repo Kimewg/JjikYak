@@ -33,7 +33,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
         }
         
-        window.rootViewController = testVC
+        window.rootViewController = ScanResultViewController()
         
         window.makeKeyAndVisible()
         self.window = window
