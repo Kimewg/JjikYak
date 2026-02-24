@@ -86,10 +86,10 @@ final class CoreDataManager {
         
         let request: NSFetchRequest<Pill> = Pill.fetchRequest()
         
-        if let count = try? context.count(for: request), count > 0 {
-            print("이미 데이터 있음:", count)
-            return
-        }
+//        if let count = try? context.count(for: request), count > 0 {
+//            print("이미 데이터 있음:", count)
+//            return
+//        }
         
         let calendar = Calendar.current
         let today = Date()

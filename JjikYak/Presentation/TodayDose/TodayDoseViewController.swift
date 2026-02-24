@@ -14,6 +14,7 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
     
     private var doses = BehaviorRelay<[Pill]>(value: [])
     private let disposeBag = DisposeBag()
+    private var isEditingMode = BehaviorRelay<Bool>(value: false)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,9 +57,18 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
         return tableView
     }()
     
+    private let editButton: UIButton = {
+        let button = UIButton()
+        let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
+        button.setImage(UIImage(systemName: "square.and.pencil", withConfiguration: imageConfig), for: .normal)
+        button.tintColor = .systemGray
+        return button
+    }()
+    
     private func configureUI() {
         view.addSubview(toDayLabel)
         view.addSubview(dosePill)
+        view.addSubview(editButton)
         view.addSubview(dosePillTableView)
         
         toDayLabel.snp.makeConstraints {
@@ -69,6 +79,12 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
         dosePill.snp.makeConstraints {
             $0.top.equalTo(toDayLabel.snp.bottom).offset(8)
             $0.leading.equalToSuperview().offset(20)
+        }
+        
+        editButton.snp.makeConstraints {
+            $0.centerY.equalTo(dosePill)
+            $0.trailing.equalToSuperview().offset(-20)
+            $0.width.height.equalTo(30)
         }
         
         dosePillTableView.snp.makeConstraints {
@@ -93,30 +109,58 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
     }
     
     private func bind() {
+        // 편집 버튼(연필) 클릭 이벤트
+        editButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                // 편집 모드 상태 토글 (true <-> false)
+                let currentMode = self.isEditingMode.value
+                self.isEditingMode.accept(!currentMode)
+                
+                // 데이터 소스를 다시 방출해서 테이블뷰가 셀들을 다시 그리게 만듦
+                self.doses.accept(self.doses.value)
+            })
+            .disposed(by: disposeBag)
+        
+        // 테이블뷰 데이터 바인딩
         doses
             .bind(to: dosePillTableView.rx.items(
                 cellIdentifier: TodayDoseCell.identifier,
                 cellType: TodayDoseCell.self)
             ) { [weak self] (row, pill, cell) in
                 
-                // 시간 데이터 포맷 (Date -> String)
-                let timeString = self?.formatDate(pill.alarmTime) ?? ""
+                guard let self = self else { return }
+                let timeString = self.formatDate(pill.alarmTime)
                 
-                // 커스텀 셀 내부의 UI 업데이트 함수 호출
+                // 셀 구성 시 편집 모드(isEditingMode) 상태 전달
                 cell.configure(
                     pillName: pill.title ?? "약 이름 없음",
                     time: timeString,
-                    isTaken: pill.isTaken
+                    isTaken: pill.isTaken,
+                    isEditing: self.isEditingMode.value // 추가됨!
                 )
                 
-                // 체크 버튼 클릭 시 상태 변경 (RxSwift)
+                // 체크 버튼 클릭 (복약 상태 변경)
                 cell.checkButton.rx.tap
                     .subscribe(onNext: { [weak self] in
                         self?.togglePillStatus(pill: pill)
                     })
                     .disposed(by: cell.disposeBag)
+                
+                // 휴지통 버튼 클릭 (약 삭제)
+                cell.deleteButton.rx.tap
+                    .subscribe(onNext: { [weak self] in
+                        self?.deletePill(pill)
+                    })
+                    .disposed(by: cell.disposeBag)
             }
             .disposed(by: disposeBag)
+    }
+    
+    // 약 삭제 함수
+    private func deletePill(_ pill: Pill) {
+        CoreDataManager.shared.deletePill(pill)
+        fetchTodayPills()
     }
     
     // 토글 상태 저장 함수

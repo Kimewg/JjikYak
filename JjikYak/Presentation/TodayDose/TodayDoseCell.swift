@@ -29,10 +29,18 @@ final class TodayDoseCell: UITableViewCell {
     let checkButton: UIButton = {
         let button = UIButton(type: .system)
         button.tintColor = .systemBlue
-
+        
         var config = UIButton.Configuration.plain()
         config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 22, weight: .medium)
         button.configuration = config
+        return button
+    }()
+    
+    let deleteButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "trash"), for: .normal)
+        button.tintColor = .systemRed
+        button.isHidden = true
         return button
     }()
     
@@ -55,39 +63,46 @@ final class TodayDoseCell: UITableViewCell {
     }
     
     private func configureUI() {
-
+        
         contentView.addSubview(containerView)
         containerView.addSubview(pillNameLabel)
         containerView.addSubview(timeLabel)
         containerView.addSubview(checkButton)
+        containerView.addSubview(deleteButton)
         
-
         containerView.snp.makeConstraints {
             $0.top.bottom.equalToSuperview().inset(6)
             $0.leading.trailing.equalToSuperview().inset(16)
         }
         
-
         checkButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().offset(16)
             $0.width.height.equalTo(44)
         }
         
+        deleteButton.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalToSuperview().offset(-16)
+            $0.width.height.equalTo(30)
+        }
+        
         pillNameLabel.snp.makeConstraints {
             $0.top.equalToSuperview().offset(16)
             $0.leading.equalTo(checkButton.snp.trailing).offset(12)
-            $0.trailing.equalToSuperview().offset(-16)
+            $0.trailing.equalTo(deleteButton.snp.leading).offset(-12)
         }
         
         timeLabel.snp.makeConstraints {
             $0.top.equalTo(pillNameLabel.snp.bottom).offset(4)
             $0.leading.equalTo(pillNameLabel)
+            $0.trailing.equalTo(pillNameLabel)
             $0.bottom.equalToSuperview().offset(-16)
         }
+        
     }
     
-    func configure(pillName: String, time: String, isTaken: Bool) {
+    func configure(pillName: String, time: String, isTaken: Bool, isEditing: Bool) {
         
         timeLabel.text = time
         
@@ -104,6 +119,8 @@ final class TodayDoseCell: UITableViewCell {
                 ]
             )
         }
+        deleteButton.isHidden = !isEditing
+        checkButton.isEnabled = !isEditing
     }
 }
 
