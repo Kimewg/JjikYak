@@ -4,7 +4,7 @@ import Moya
 final class GeminiService {
     private let provider = MoyaProvider<GeminiTarget>()
     
-    func parsePillInfo(ocrText: String, completion: @escaping (Result<PillInfo, Error>) -> Void) {
+    func parsePillInfo(ocrText: String, completion: @escaping (Result<[PillInfo], Error>) -> Void) {
         
         provider.request(.parsePillInfo(ocrText: ocrText)) { result in
             switch result {
@@ -14,6 +14,7 @@ final class GeminiService {
                     
                     if let resultText = decodedData.candidates.first?.content.parts.first?.text {
                         
+                        print("[AI의 실제 답변 원본(Raw)]:\n\(resultText)\n====================================")
                         // 마크다운 포장지 청소 (```json, ```, 줄바꿈 제거)
                         var cleanJSONString = resultText.replacingOccurrences(of: "```json\n", with: "")
                         cleanJSONString = cleanJSONString.replacingOccurrences(of: "```", with: "")
@@ -26,11 +27,13 @@ final class GeminiService {
                             return
                         }
                         
-                        // PillInfo 구조체로 변환
-                        let pillInfo = try JSONDecoder().decode(PillInfo.self, from: jsonData)
+//                        // PillInfo 구조체로 변환
+//                        let pillInfo = try JSONDecoder().decode(PillInfo.self, from: jsonData)
+                        // PillInfo -> PillInfos로 변경(약이 여러개인 상황일때를 대비해 배열로 들어가도록)
+                        let pillInfos = try JSONDecoder().decode([PillInfo].self, from: jsonData)
                         
                         // UI로 객체 전달
-                        completion(.success(pillInfo))
+                        completion(.success(pillInfos))
                         
                     } else {
                         let error = NSError(domain: "GeminiError", code: -1, userInfo: [NSLocalizedDescriptionKey: "응답 텍스트가 비어있습니다."])
