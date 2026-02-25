@@ -21,6 +21,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         print("API키 확인 : \(ConfigManager.geminiAPIKey)")
         
         let testService = GeminiService()
+        
+        testService.parsePillInfo(ocrText: "타이레놀 8시간 이알 서방정, 식후 30분 복용, 비타민 A, 비타민D") { result in
             
             DispatchQueue.main.async {
                 switch result {
@@ -47,7 +49,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 case .failure(let error):
                     print("❌ 통신 또는 디코딩 에러 발생: \(error)")
                 }
-        testService.parsePillInfo(ocrText: "타이레놀 8시간 이알 서방정, 식후 30분 복용, 비타민 A, 비타민D") { result in
             }
         }
         
