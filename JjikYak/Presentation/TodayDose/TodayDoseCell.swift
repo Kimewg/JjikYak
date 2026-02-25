@@ -123,15 +123,3 @@ final class TodayDoseCell: UITableViewCell {
         checkButton.isEnabled = !isEditing
     }
 }
-
-extension String {
-    func strikeThrough(color: UIColor) -> NSAttributedString {
-        return NSAttributedString(
-            string: self,
-            attributes: [
-                .strikethroughStyle: NSUnderlineStyle.single.rawValue,
-                .foregroundColor: color
-            ]
-        )
-    }
-}

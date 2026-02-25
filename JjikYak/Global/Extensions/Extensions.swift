@@ -6,6 +6,7 @@
 //
 import UIKit
 
+// 네비게이션바 설정
 extension UIViewController {
     func setNavigationTitle(main: String, sub: String? = nil) {
         // 내비게이션 바 배경색 및 스타일 설정
@@ -13,7 +14,7 @@ extension UIViewController {
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = .systemBlue
         
-        // 내비게이션 바 아이템(뒤로가기 버튼 등) 색상을 흰색으로
+        // 내비게이션 바 아이템(뒤로가기 버튼 등)
         navigationController?.navigationBar.tintColor = .white
         
         // 실제 적용
@@ -31,5 +32,18 @@ extension UIViewController {
         }
         
         self.navigationItem.titleView = titleView
+    }
+}
+
+// 취소선 설정
+extension String {
+    func strikeThrough(color: UIColor) -> NSAttributedString {
+        return NSAttributedString(
+            string: self,
+            attributes: [
+                .strikethroughStyle: NSUnderlineStyle.single.rawValue,
+                .foregroundColor: color
+            ]
+        )
     }
 }
