@@ -44,6 +44,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                     // 단일 PillInfo 객체를 배열에 감싸서 화면에 전달
                     resultVC.pillList = pillInfos
                     
+                    resultVC.bindData()
+                    
                     window.rootViewController = resultVC
                     
                 case .failure(let error):
