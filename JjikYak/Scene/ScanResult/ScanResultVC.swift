@@ -182,11 +182,14 @@ final class ScanResultViewController: UIViewController {
             return cardView
         }
     
-    private func bindData() {
-            // 1. 파란색 안내 박스 텍스트 업데이트
+        func bindData() {
+            // 1. 기존에 그려진 카드가 있다면 싹 다 지우기 (중복 방지 초기화)
+            pillListStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            
+            // 2. 파란색 안내 박스 텍스트 업데이트
             summaryLabel.text = "총 \(pillList.count)개의 약이 인식되었습니다"
             
-            // 2. 바구니에 있는 약 개수만큼 카드 찍어내기
+            // 3. 바구니에 있는 약 개수만큼 카드 찍어내기
             for pill in pillList {
                 let card = createPillCard(name: pill.pillName, dosage: pill.dosage, efficacy: pill.efficacy)
                 pillListStackView.addArrangedSubview(card)
