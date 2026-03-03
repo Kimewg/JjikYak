@@ -18,7 +18,7 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setNavigationTitle(main: "찍약", sub: "알약 검색 및 복약 관리")
+        setNavigationTitle(main: "찍약", sub: "알약 검색 및 복약 관리", showBackButton: false)
         configureUI()
         configureTableView()
         bind()
