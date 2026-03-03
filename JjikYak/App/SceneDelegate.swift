@@ -20,35 +20,37 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         print("API키 확인 : \(ConfigManager.geminiAPIKey)")
         
-        let testService = GeminiService()
-        testService.parsePillInfo(ocrText: "타이레놀 8시간 이알 서방정, 식후 30분 복용, 비타민 A, 비타민D") { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let pillInfos):
-                    
-                    // 이름, 복용법, 효능을 보기 좋게 하나의 문자열로.
-                    let allPillDetails = pillInfos.map { pill in
-                        "💊 이름: \(pill.pillName) | 🗓️ 복용법: \(pill.dosage) | 🩹 효능: \(pill.efficacy)"
-                    }.joined(separator: "\n------------------------------------------------\n")
-                    
-                    print("✅ 디코딩 성공. 총 \(pillInfos.count)개의 약이 인식되었습니다.")
-                    print("------------------------------------------------")
-                    print(allPillDetails)
-                    print("------------------------------------------------")
-                    
-                    
-                    let resultVC = ScanResultViewController()
-                    
-                    // 단일 PillInfo 객체를 배열에 감싸서 화면에 전달
-                    resultVC.pillList = pillInfos
-                    
-                    window.rootViewController = resultVC
-                    
-                case .failure(let error):
-                    print("❌ 통신 또는 디코딩 에러 발생: \(error)")
-                }
-            }
-        }
+//        let testService = GeminiService()
+//        
+//        testService.parsePillInfo(ocrText: "타이레놀 8시간 이알 서방정, 식후 30분 복용, 비타민 A, 비타민D") { result in
+//            
+//            DispatchQueue.main.async {
+//                switch result {
+//                case .success(let pillInfos):
+//                    
+//                    // 이름, 복용법, 효능을 보기 좋게 하나의 문자열로.
+//                    let allPillDetails = pillInfos.map { pill in
+//                        "💊 이름: \(pill.pillName) | 🗓️ 복용법: \(pill.dosage) | 🩹 효능: \(pill.efficacy)"
+//                    }.joined(separator: "\n------------------------------------------------\n")
+//                    
+//                    print("✅ 디코딩 성공. 총 \(pillInfos.count)개의 약이 인식되었습니다.")
+//                    print("------------------------------------------------")
+//                    print(allPillDetails)
+//                    print("------------------------------------------------")
+//                    
+//                    
+//                    let resultVC = ScanResultViewController()
+//                    
+//                    // 단일 PillInfo 객체를 배열에 감싸서 화면에 전달
+//                    resultVC.pillList = pillInfos
+//                    
+//                    window.rootViewController = resultVC
+//                    
+//                case .failure(let error):
+//                    print("❌ 통신 또는 디코딩 에러 발생: \(error)")
+//                }
+//            }
+//        }
         
         window.rootViewController = tabBar
         window.makeKeyAndVisible()

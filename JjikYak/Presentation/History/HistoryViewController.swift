@@ -157,9 +157,9 @@ class HistoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        setNavigationTitle(main: "복약 히스토리", sub: "복용 기록과 예정을 확인하세요")
+        setNavigationTitle(main: "복약 히스토리", sub: "복용 기록과 예정을 확인하세요", showBackButton: false)
         
-        configureUI()
+        configure()
         bind()
         currentMonth.accept(Date())
     }
@@ -225,7 +225,7 @@ class HistoryViewController: UIViewController {
         }
     }
     
-    private func configureUI() {
+    private func configure() {
         // 상단 달력 뷰 추가
         view.addSubview(prevButton)
         view.addSubview(nextButton)
