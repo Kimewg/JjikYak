@@ -29,6 +29,17 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
         fetchTodayPills()
     }
     
+    private let emptyStateLabel: UILabel = {
+        let label = UILabel()
+        label.text = "오늘 복용할 약이 없습니다. \n새로운 약을 등록해보세요!"
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.textColor = .systemGray
+        label.isHidden = true
+        return label
+    }()
+    
     private let toDayLabel: UILabel = {
         let label = UILabel()
         
@@ -101,6 +112,8 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
             TodayDoseCell.self,
             forCellReuseIdentifier: TodayDoseCell.identifier
         )
+        
+        dosePillTableView.backgroundView = emptyStateLabel
     }
     
     private func fetchTodayPills() {
@@ -123,6 +136,11 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
             .disposed(by: disposeBag)
         
         // 테이블뷰 데이터 바인딩
+        doses
+            .map { !$0.isEmpty }
+            .bind(to: emptyStateLabel.rx.isHidden) // 데이터 있으면 라벨 숨김(hidden = true)
+            .disposed(by: disposeBag)
+        
         doses
             .bind(to: dosePillTableView.rx.items(
                 cellIdentifier: TodayDoseCell.identifier,
