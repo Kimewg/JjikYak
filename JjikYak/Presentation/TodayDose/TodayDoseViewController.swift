@@ -155,7 +155,7 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
                     pillName: pill.title ?? "약 이름 없음",
                     time: timeString,
                     isTaken: pill.isTaken,
-                    isEditing: self.isEditingMode.value // 추가됨!
+                    isEditing: self.isEditingMode.value
                 )
                 
                 // 체크 버튼 클릭 (복약 상태 변경)
