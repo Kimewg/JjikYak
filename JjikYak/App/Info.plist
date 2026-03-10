@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>갤러리에 저장된 약 봉투 또는 약 사진을 불러오기 위해 사진첩 접근 권한이 필요합니다.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>약 정보를 스캔하기 위해 카메라 접근 권한이 필요합니다.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
