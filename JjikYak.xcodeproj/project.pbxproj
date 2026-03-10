@@ -19,7 +19,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C6735D842F3EECDA0025FA25 /* Exceptions for "JjikYak" folder in "JjikYak" target */ = {
+		F6D8C59B2F5FF6AA0029B88D /* Exceptions for "JjikYak" folder in "JjikYak" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				App/Info.plist,
@@ -32,7 +32,7 @@
 		C6735BEB2F3EDB060025FA25 /* JjikYak */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				C6735D842F3EECDA0025FA25 /* Exceptions for "JjikYak" folder in "JjikYak" target */,
+				F6D8C59B2F5FF6AA0029B88D /* Exceptions for "JjikYak" folder in "JjikYak" target */,
 			);
 			path = JjikYak;
 			sourceTree = "<group>";
