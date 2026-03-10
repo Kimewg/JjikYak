@@ -14,6 +14,8 @@ class HistoryViewController: UIViewController {
     let selectedDatePills = BehaviorRelay<[Pill]>(value: [])
     var calendarHeightConstraint: Constraint?
     
+    private let customNavBar = CustomNavigationBar()
+    
     let dateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd"
@@ -157,7 +159,13 @@ class HistoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        setNavigationTitle(main: "복약 히스토리", sub: "복용 기록과 예정을 확인하세요", showBackButton: false)
+        
+        customNavBar.configure(
+            title: "복약 히스토리",
+            subTitle: "복용 기록과 예정을 확인하세요",
+            showBackButton: false,
+            showBellButton: false
+        )
         
         configure()
         bind()
@@ -166,6 +174,7 @@ class HistoryViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
         loadMonthlyPillStatus()
         
         if let currentSelected = selectedDate.value {
@@ -227,6 +236,7 @@ class HistoryViewController: UIViewController {
     
     private func configure() {
         // 상단 달력 뷰 추가
+        view.addSubview(customNavBar)
         view.addSubview(prevButton)
         view.addSubview(nextButton)
         view.addSubview(monthLabel)
@@ -257,8 +267,13 @@ class HistoryViewController: UIViewController {
         legendItemsStackView.alignment = .leading
         legendContainerView.addSubview(legendItemsStackView)
         
+        customNavBar.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
+        }
+        
         monthLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            $0.top.equalTo(customNavBar.snp.bottom).offset(24)
             $0.centerX.equalToSuperview()
         }
         

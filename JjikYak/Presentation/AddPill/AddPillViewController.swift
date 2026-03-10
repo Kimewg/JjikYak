@@ -12,7 +12,7 @@ import RxCocoa
 class AddPillViewController: UIViewController {
     
     private let disposeBag = DisposeBag()
-    
+    private let customNavBar = CustomNavigationBar()
     private let quickAddButton = AddMethodCardView(type: .quick)
     private let directAddButton = AddMethodCardView(type: .direct)
     
@@ -29,33 +29,36 @@ class AddPillViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         
+        customNavBar.configure(
+            title: "새로운 약 등록",
+            subTitle: nil,
+            showBackButton: true,
+            showBellButton: false
+        )
+        
         configure()
         bind()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        setupNavigationBar()
-    }
-    
-    private func setupNavigationBar() {
-        if let backButton = setNavigationTitle(main: "약 등록 방법 선택", showBackButton: true) {
-            backButton.rx.tap
-                .subscribe(onNext: { [weak self] in
-                    self?.dismiss(animated: true)
-                })
-                .disposed(by: disposeBag)
-        }
+        navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     
     private func configure() {
+        view.addSubview(customNavBar)
         view.addSubview(stackView)
         
         stackView.addArrangedSubview(quickAddButton)
         stackView.addArrangedSubview(directAddButton)
         
+        customNavBar.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
+        }
+        
         stackView.snp.makeConstraints {
-            $0.centerY.equalToSuperview()
+            $0.centerY.equalToSuperview().offset(40)
             $0.leading.trailing.equalToSuperview().inset(24)
         }
         
@@ -69,11 +72,18 @@ class AddPillViewController: UIViewController {
     }
     
     private func bind() {
+        customNavBar.backButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.dismiss(animated: true)
+            })
+            .disposed(by: disposeBag)
+        
         quickAddButton.rx.controlEvent(.touchUpInside)
             .subscribe(onNext: {
                 print("빠른 등록 클릭됨 - 카메라/앨범 화면으로 이동")
             })
             .disposed(by: disposeBag)
+        
         directAddButton.rx.controlEvent(.touchUpInside)
             .subscribe(onNext: {
                 print("수동 등록 클릭됨 - 직접 입력 화면으로 이동")

@@ -16,9 +16,19 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
     private let disposeBag = DisposeBag()
     private var isEditingMode = BehaviorRelay<Bool>(value: false)
     
+    private let customNavBar = CustomNavigationBar()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        setNavigationTitle(main: "찍약", sub: "알약 검색 및 복약 관리", showBackButton: false)
+        view.backgroundColor = .systemBackground
+        
+        customNavBar.configure(
+            title: "찍약",
+            subTitle: "알약 검색 및 복약 관리",
+            showBackButton: false,
+            showBellButton: true
+        )
+        
         configureUI()
         configureTableView()
         bind()
@@ -26,8 +36,20 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
         fetchTodayPills()
     }
+    
+    private let emptyStateLabel: UILabel = {
+        let label = UILabel()
+        label.text = "오늘 복용할 약이 없습니다. \n새로운 약을 등록해보세요!"
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.textColor = .systemGray
+        label.isHidden = true
+        return label
+    }()
     
     private let toDayLabel: UILabel = {
         let label = UILabel()
@@ -37,23 +59,23 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
         formatter.dateFormat = "yyyy년 M월 d일 EEEE"
         
         label.text = formatter.string(from: Date())
-        label.font = .systemFont(ofSize: 20, weight: .bold)
-        label.textColor = .label
-        
+        label.font = .systemFont(ofSize: 15, weight: .medium)
+        label.textColor = .secondaryLabel
         return label
     }()
     
     private let dosePill: UILabel = {
         let label = UILabel()
         label.text = "오늘 먹을 약"
-        label.font = .systemFont(ofSize: 30, weight: .bold)
-        
+        label.font = .systemFont(ofSize: 26, weight: .bold)
+        label.textColor = .label
         return label
     }()
     
     private let dosePillTableView: UITableView = {
         let tableView = UITableView()
         tableView.separatorStyle = .none
+        tableView.backgroundColor = .clear
         return tableView
     }()
     
@@ -61,23 +83,29 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
         let button = UIButton()
         let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
         button.setImage(UIImage(systemName: "square.and.pencil", withConfiguration: imageConfig), for: .normal)
-        button.tintColor = .systemGray
+        button.tintColor = .darkGray
         return button
     }()
     
     private func configureUI() {
+        view.addSubview(customNavBar)
         view.addSubview(toDayLabel)
         view.addSubview(dosePill)
         view.addSubview(editButton)
         view.addSubview(dosePillTableView)
         
+        customNavBar.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
+        }
+        
         toDayLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            $0.top.equalTo(customNavBar.snp.bottom).offset(24)
             $0.leading.equalToSuperview().offset(20)
         }
         
         dosePill.snp.makeConstraints {
-            $0.top.equalTo(toDayLabel.snp.bottom).offset(8)
+            $0.top.equalTo(toDayLabel.snp.bottom).offset(10)
             $0.leading.equalToSuperview().offset(20)
         }
         
@@ -88,7 +116,7 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
         }
         
         dosePillTableView.snp.makeConstraints {
-            $0.top.equalTo(dosePill.snp.bottom).offset(20)
+            $0.top.equalTo(dosePill.snp.bottom).offset(10)
             $0.leading.trailing.bottom.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
@@ -101,6 +129,8 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
             TodayDoseCell.self,
             forCellReuseIdentifier: TodayDoseCell.identifier
         )
+        
+        dosePillTableView.backgroundView = emptyStateLabel
     }
     
     private func fetchTodayPills() {
@@ -122,7 +152,19 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
             })
             .disposed(by: disposeBag)
         
+        // 커스텀 헤더의 종 버튼(알림) 클릭 이벤트
+        customNavBar.bellButton.rx.tap
+            .subscribe(onNext: {
+                print("알림 아이콘 클릭됨!")
+            })
+            .disposed(by: disposeBag)
+        
         // 테이블뷰 데이터 바인딩
+        doses
+            .map { !$0.isEmpty }
+            .bind(to: emptyStateLabel.rx.isHidden) // 데이터 있으면 라벨 숨김(hidden = true)
+            .disposed(by: disposeBag)
+        
         doses
             .bind(to: dosePillTableView.rx.items(
                 cellIdentifier: TodayDoseCell.identifier,
@@ -137,7 +179,7 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
                     pillName: pill.title ?? "약 이름 없음",
                     time: timeString,
                     isTaken: pill.isTaken,
-                    isEditing: self.isEditingMode.value // 추가됨!
+                    isEditing: self.isEditingMode.value
                 )
                 
                 // 체크 버튼 클릭 (복약 상태 변경)
