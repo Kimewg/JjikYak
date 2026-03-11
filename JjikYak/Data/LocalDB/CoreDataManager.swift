@@ -82,14 +82,32 @@ final class CoreDataManager {
         saveContext()
     }
     
+    // 현재 시간으로부터 딱 1분 뒤에 울리는 더미 약 추가
+    func addTestPillForOneMinuteLater() {
+        let pill = Pill(context: context)
+        pill.id = UUID()
+        pill.title = "1분 뒤 테스트 약"
+        pill.memo = "푸시 알림이 잘 오는지 테스트합니다."
+        pill.dosage = "1정"
+        pill.isTaken = false
+        
+        // 현재 시간(Date())에서 60초(1분)를 더한 시간으로 설정
+        let targetTime = Date().addingTimeInterval(60)
+        pill.alarmTime = targetTime
+        pill.createdAt = Date() // 생성일은 현재로
+        
+        saveContext()
+        print("✅ 1분 뒤 알림 테스트용 약이 코어데이터에 저장되었습니다: \(targetTime)")
+    }
+    
     func insertDummyPillsIfNeeded() {
         let request: NSFetchRequest<Pill> = Pill.fetchRequest()
         
-         // 필요 시 주석을 해제하여 데이터가 중복 생성되는 것을 방지하세요.
-         if let count = try? context.count(for: request), count > 0 {
-             print("이미 데이터 있음:", count)
-             return
-         }
+        // 필요 시 주석을 해제하여 데이터가 중복 생성되는 것을 방지하세요.
+        if let count = try? context.count(for: request), count > 0 {
+            print("이미 데이터 있음:", count)
+            return
+        }
         
         let calendar = Calendar.current
         let today = Date()

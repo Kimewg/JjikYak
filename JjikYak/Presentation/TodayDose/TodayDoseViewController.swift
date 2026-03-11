@@ -9,6 +9,7 @@ import SnapKit
 import RxRelay
 import RxSwift
 import RxCocoa
+import UserNotifications
 
 class TodayDoseViewController: UIViewController, UITableViewDelegate {
     
@@ -32,6 +33,14 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
         configureUI()
         configureTableView()
         bind()
+        checkAndUpdateBellState()
+        CoreDataManager.shared.addTestPillForOneMinuteLater()
+        
+        NotificationCenter.default.rx.notification(UIApplication.willEnterForegroundNotification)
+            .subscribe(onNext: { [weak self] _ in
+                self?.checkAndUpdateBellState()
+            })
+            .disposed(by: disposeBag)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -121,6 +130,74 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
     }
+    // 알림 상태 확인 및 UI 업데이트
+        private func checkAndUpdateBellState() {
+            NotificationManager.shared.checkNotificationStatus { [weak self] status in
+                guard let self = self else { return }
+                
+                switch status {
+                case .authorized:
+                    // 권한 허용 상태: 유저의 UserDefaults 설정값을 따름
+                    let isEnabled = UserDefaults.standard.isNotificationEnabled
+                    self.updateBellIcon(isEnabled: isEnabled)
+                    
+                    if isEnabled {
+                        NotificationManager.shared.scheduleNotifications(for: self.doses.value)
+                    }
+                    
+                case .denied:
+                    // 권한 거부 상태
+                    // 유저가 설정 앱에 갔다가 알림을 안 켜고 그냥 돌아왔을 때를 대비해,
+                    // 내부 설정값(UserDefaults)도 다시 강제로 꺼버립니다.
+                    UserDefaults.standard.isNotificationEnabled = false
+                    self.updateBellIcon(isEnabled: false)
+                    
+                case .notDetermined:
+                    // 최초 실행 시
+                    NotificationManager.shared.requestPermission { granted in
+                        if granted {
+                            UserDefaults.standard.isNotificationEnabled = true
+                            self.updateBellIcon(isEnabled: true)
+                            NotificationManager.shared.scheduleNotifications(for: self.doses.value)
+                        } else {
+                            UserDefaults.standard.isNotificationEnabled = false
+                            self.updateBellIcon(isEnabled: false)
+                        }
+                    }
+                    
+                default:
+                    break
+                }
+            }
+        }
+    // 종아이콘 활성화/비활성화 UI
+    private func updateBellIcon(isEnabled: Bool) {
+        let imageName = isEnabled ? "bell.fill" : "bell.slash"
+        let imageConfig = UIImage.SymbolConfiguration(pointSize: 20, weight: .regular)
+        
+        customNavBar.bellButton.setImage(UIImage(systemName: imageName, withConfiguration: imageConfig), for: .normal)
+        customNavBar.bellButton.tintColor = isEnabled ? .systemYellow : .darkGray
+    }
+    // 권한 거부 시 설정 앱 이동 알림
+    private func showSettingsAlert() {
+        let alert = UIAlertController(
+            title: "알림 권한 필요",
+            message: "약 복용 시간을 안내받으려면 기기 설정에서 알림 권한을 허용해주세요.",
+            preferredStyle: .alert
+        )
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        let settingsAction = UIAlertAction(title: "설정으로 이동", style: .default) { _ in
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+        }
+        
+        alert.addAction(cancelAction)
+        alert.addAction(settingsAction)
+        
+        self.present(alert, animated: true)
+    }
     
     private func configureTableView() {
         dosePillTableView.delegate = self
@@ -136,10 +213,14 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
     private func fetchTodayPills() {
         let fetchedPills = CoreDataManager.shared.fetchPills(on: Date())
         doses.accept(fetchedPills)
+        
+        if UserDefaults.standard.isNotificationEnabled {
+            NotificationManager.shared.scheduleNotifications(for: fetchedPills)
+        }
     }
     
     private func bind() {
-        // 편집 버튼(연필) 클릭 이벤트
+        // 편집 버튼 클릭 이벤트
         editButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
@@ -154,8 +235,45 @@ class TodayDoseViewController: UIViewController, UITableViewDelegate {
         
         // 커스텀 헤더의 종 버튼(알림) 클릭 이벤트
         customNavBar.bellButton.rx.tap
-            .subscribe(onNext: {
-                print("알림 아이콘 클릭됨!")
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                
+                NotificationManager.shared.checkNotificationStatus { status in
+                    switch status {
+                    case .authorized:
+                        // 이미 허용됨 -> 기존처럼 ON/OFF 토글
+                        let newState = !UserDefaults.standard.isNotificationEnabled
+                        UserDefaults.standard.isNotificationEnabled = newState
+                        self.updateBellIcon(isEnabled: newState)
+                        
+                        if newState {
+                            NotificationManager.shared.scheduleNotifications(for: self.doses.value)
+                        } else {
+                            NotificationManager.shared.removeAllNotifications()
+                        }
+                        
+                    case .denied:
+                        // 거부됨 -> 설정 창으로 유도
+                        UserDefaults.standard.isNotificationEnabled = true
+                        self.showSettingsAlert()
+                        
+                    case .notDetermined:
+                        // 아직 안 물어봄 -> 권한 요청
+                        NotificationManager.shared.requestPermission { granted in
+                            if granted {
+                                UserDefaults.standard.isNotificationEnabled = true
+                                self.updateBellIcon(isEnabled: true)
+                                NotificationManager.shared.scheduleNotifications(for: self.doses.value)
+                            } else {
+                                self.updateBellIcon(isEnabled: false)
+                                UserDefaults.standard.isNotificationEnabled = false
+                            }
+                        }
+                        
+                    default:
+                        break
+                    }
+                }
             })
             .disposed(by: disposeBag)
         
