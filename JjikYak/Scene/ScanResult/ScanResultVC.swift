@@ -1,198 +1,260 @@
 import UIKit
 import SnapKit
+import RxSwift
+import RxCocoa
 
-final class ScanResultViewController: UIViewController {
+class ScanResultViewController: UIViewController {
     
+    private let disposeBag = DisposeBag()
     
     var pillList: [PillInfo] = []
     
-    // 상단 제목 라벨
+    // 뒷배경을 어둡게 만들어줄 투명 뷰
+    private let dimView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .black.withAlphaComponent(0.6)
+        return view
+    }()
+    
+    private let containerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemBackground
+        view.layer.cornerRadius = 24
+        view.clipsToBounds = true
+        return view
+    }()
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "스캔 결과 확인"
         label.font = .systemFont(ofSize: 20, weight: .bold)
-        label.textAlignment = .center
         label.textColor = .black
+        label.textAlignment = .center
         return label
     }()
     
-    // 하단 '틀려요' 버튼 (회색)
+    private let summaryContainerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(red: 0.9, green: 0.95, blue: 1.0, alpha: 1.0)
+        view.layer.cornerRadius = 12
+        return view
+    }()
+    
+    private let summaryLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 16, weight: .semibold)
+        label.textColor = .systemBlue
+        return label
+    }()
+    
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        return scrollView
+    }()
+    
+    private let pillStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 12
+        return stack
+    }()
+    
+    private let questionLabel: UILabel = {
+        let label = UILabel()
+        label.text = "스캔된 약 정보가 정확한가요?"
+        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.textColor = .darkGray
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private let buttonStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 12
+        stack.distribution = .fillEqually
+        return stack
+    }()
+    
     private let incorrectButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("틀려요", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        button.setTitleColor(.darkGray, for: .normal)
         button.backgroundColor = UIColor(white: 0.95, alpha: 1.0)
-        button.layer.cornerRadius = 12
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        button.layer.cornerRadius = 14
         return button
     }()
     
-    // 하단 '맞아요' 버튼 (파란색)
     private let correctButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("맞아요", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .systemBlue
-        button.layer.cornerRadius = 12
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        button.layer.cornerRadius = 14
         return button
     }()
     
-    // 하단 버튼 2개를 담을 가로 상자 (StackView)
-    private let buttonStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .horizontal
-        stackView.spacing = 16
-        stackView.distribution = .fillEqually // 5:5 비율 유지
-        return stackView
-    }()
+    // MARK: - Initialization (팝업 설정)
+    init(pillList: [PillInfo]) {
+        self.pillList = pillList
+        super.init(nibName: nil, bundle: nil)
+        //핵심: 배경이 투명하게 보이도록 설정
+        self.modalPresentationStyle = .overFullScreen
+        self.modalTransitionStyle = .crossDissolve
+    }
     
-    // "총 N개의 약이 인식되었습니다" 연한 파란색 안내 박스
-    private let summaryContainerView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1) // 아주 연한 파란색
-        view.layer.cornerRadius = 12
-        return view
-    }()
-    
-    // 안내 박스 안의 텍스트
-    private let summaryLabel: UILabel = {
-        let label = UILabel()
-        label.text = "총 1개의 약이 인식되었습니다" // (임시 텍스트)
-        label.textColor = .systemBlue
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        return label
-    }()
-    
-    // 약 리스트가 길어지면 위아래로 움직이게 해줄 투명한 스크롤
-    private let scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
-        scrollView.showsVerticalScrollIndicator = false // 스크롤바 숨기기
-        return scrollView
-    }()
-    
-    private let pillListStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 16 // 약 카드들 사이의 여백
-        return stackView
-    }()
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        
-                
         setupUI()
         setupConstraints()
+        bindData()
+        bindAction()
     }
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .clear // 전체 배경 투명하게
         
-        view.addSubview(titleLabel)
+        view.addSubview(dimView)
+        view.addSubview(containerView)
         
-        view.addSubview(summaryContainerView)
+        [titleLabel, summaryContainerView, scrollView, questionLabel, buttonStackView].forEach {
+            containerView.addSubview($0)
+        }
+        
         summaryContainerView.addSubview(summaryLabel)
-        
-        view.addSubview(scrollView)
-        scrollView.addSubview(pillListStackView)
+        scrollView.addSubview(pillStackView)
         
         buttonStackView.addArrangedSubview(incorrectButton)
         buttonStackView.addArrangedSubview(correctButton)
-        view.addSubview(buttonStackView)
     }
     
     private func setupConstraints() {
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(24)
-            make.centerX.equalToSuperview()
-        }
-        
-        summaryContainerView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(24)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.height.equalTo(56)
-        }
-        
-        summaryLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-        
-        scrollView.snp.makeConstraints { make in
-            make.top.equalTo(summaryContainerView.snp.bottom).offset(24)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.bottom.equalTo(buttonStackView.snp.top).offset(-24)
-        }
-        
-        pillListStackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalToSuperview() // 너비를 고정해야 가로로 안 흔들림!
-        }
-        
-        buttonStackView.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-24)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.height.equalTo(56)
-        }
-    }
-            
-        // 약 데이터를 넣으면 카드 뷰(UIView)를 만드는 함수
-        private func createPillCard(name: String, dosage: String, efficacy: String) -> UIView {
-            // 1. 카드의 하얀 바탕 (모서리 둥글게, 살짝 그림자)
-            let cardView = UIView()
-            cardView.backgroundColor = .white
-            cardView.layer.cornerRadius = 12
-            cardView.layer.borderWidth = 1
-            cardView.layer.borderColor = UIColor.systemGray5.cgColor // 아주 연한 회색 테두리
-            cardView.layer.shadowColor = UIColor.black.cgColor
-            cardView.layer.shadowOpacity = 0.05 // 은은한 그림자
-            cardView.layer.shadowOffset = CGSize(width: 0, height: 2)
-            cardView.layer.shadowRadius = 4
-            
-            // 2. 카드 안에 들어갈 글씨들
-            let nameLabel = UILabel()
-            nameLabel.text = "💊 \(name)"
-            nameLabel.font = .systemFont(ofSize: 18, weight: .bold)
-            nameLabel.textColor = .black
-            
-            let dosageLabel = UILabel()
-            dosageLabel.text = "🕒 복용법: \(dosage)"
-            dosageLabel.font = .systemFont(ofSize: 14)
-            dosageLabel.textColor = .darkGray
-            dosageLabel.numberOfLines = 0 // 글이 길면 자동으로 줄바꿈
-            
-            let efficacyLabel = UILabel()
-            efficacyLabel.text = "✨ 효능: \(efficacy)"
-            efficacyLabel.font = .systemFont(ofSize: 14)
-            efficacyLabel.textColor = .darkGray
-            efficacyLabel.numberOfLines = 0
-            
-            // 3. 글씨들을 위에서 아래로 예쁘게 정렬해 줄 상자
-            let contentStack = UIStackView(arrangedSubviews: [nameLabel, dosageLabel, efficacyLabel])
-            contentStack.axis = .vertical
-            contentStack.spacing = 8
-            
-            // 4. 카드 바탕 위에 상자 올리기
-            cardView.addSubview(contentStack)
-            contentStack.snp.makeConstraints { make in
-                make.edges.equalToSuperview().inset(16) // 카드 테두리에서 안쪽으로 16씩 여백
+            dimView.snp.makeConstraints {
+                $0.edges.equalToSuperview()
             }
             
-            return cardView
+            containerView.snp.makeConstraints {
+                $0.center.equalToSuperview()
+                $0.leading.trailing.equalToSuperview().inset(24)
+                $0.height.lessThanOrEqualTo(view.safeAreaLayoutGuide).multipliedBy(0.8)
+            }
+            
+            titleLabel.snp.makeConstraints {
+                $0.top.equalToSuperview().offset(32)
+                $0.centerX.equalToSuperview()
+            }
+            
+            summaryContainerView.snp.makeConstraints {
+                $0.top.equalTo(titleLabel.snp.bottom).offset(24)
+                $0.leading.trailing.equalToSuperview().inset(24)
+                $0.height.equalTo(56)
+            }
+            
+            summaryLabel.snp.makeConstraints {
+                $0.centerY.equalToSuperview()
+                $0.leading.equalToSuperview().offset(20)
+            }
+            
+            scrollView.snp.makeConstraints {
+                $0.top.equalTo(summaryContainerView.snp.bottom).offset(16)
+                $0.leading.trailing.equalToSuperview().inset(24)
+                
+                // 스크롤뷰 높이를 내부 리스트(스택뷰) 길이에 맞추되, 최대 300까지만 커지게 설정
+                $0.height.equalTo(pillStackView.snp.height).priority(.high)
+                $0.height.lessThanOrEqualTo(300)
+            }
+            
+            pillStackView.snp.makeConstraints {
+                $0.edges.equalToSuperview()
+                $0.width.equalToSuperview()
+            }
+            
+            questionLabel.snp.makeConstraints {
+                $0.top.equalTo(scrollView.snp.bottom).offset(24)
+                $0.centerX.equalToSuperview()
+            }
+            
+            buttonStackView.snp.makeConstraints {
+                $0.top.equalTo(questionLabel.snp.bottom).offset(16)
+                $0.leading.trailing.equalToSuperview().inset(24)
+                $0.bottom.equalToSuperview().offset(-32)
+                $0.height.equalTo(56)
+            }
         }
     
-        func bindData() {
-            // 1. 기존에 그려진 카드가 있다면 싹 다 지우기 (중복 방지 초기화)
-            pillListStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-            
-            // 2. 파란색 안내 박스 텍스트 업데이트
-            summaryLabel.text = "총 \(pillList.count)개의 약이 인식되었습니다"
-            
-            // 3. 바구니에 있는 약 개수만큼 카드 찍어내기
-            for pill in pillList {
-                let card = createPillCard(name: pill.pillName, dosage: pill.dosage, efficacy: pill.efficacy)
-                pillListStackView.addArrangedSubview(card)
-            }
+    private func bindData() {
+        summaryLabel.text = "총 \(pillList.count)개의 약이 인식되었습니다"
+        
+        for (index, pill) in pillList.enumerated() {
+            let pillRow = createPillRowView(index: index + 1, name: pill.pillName)
+            pillStackView.addArrangedSubview(pillRow)
         }
+    }
+    
+    // 디자인 시안에 맞춘 개별 약 행(Row) 생성
+    private func createPillRowView(index: Int, name: String) -> UIView {
+        let view = UIView()
+        view.layer.cornerRadius = 16
+        view.layer.borderWidth = 1
+        view.layer.borderColor = UIColor.systemGray5.cgColor
+        view.snp.makeConstraints { $0.height.equalTo(64) }
+        
+        let numberCircle = UIView()
+        numberCircle.backgroundColor = UIColor(red: 0.9, green: 0.95, blue: 1.0, alpha: 1.0)
+        numberCircle.layer.cornerRadius = 14
+        
+        let numberLabel = UILabel()
+        numberLabel.text = "\(index)"
+        numberLabel.textColor = .systemBlue
+        numberLabel.font = .systemFont(ofSize: 14, weight: .bold)
+        
+        let nameLabel = UILabel()
+        nameLabel.text = name
+        nameLabel.textColor = .black
+        nameLabel.font = .systemFont(ofSize: 16, weight: .bold)
+        
+        view.addSubview(numberCircle)
+        numberCircle.addSubview(numberLabel)
+        view.addSubview(nameLabel)
+        
+        numberCircle.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(16)
+            $0.centerY.equalToSuperview()
+            $0.width.height.equalTo(28)
+        }
+        
+        numberLabel.snp.makeConstraints {
+            $0.center.equalToSuperview()
+        }
+        
+        nameLabel.snp.makeConstraints {
+            $0.leading.equalTo(numberCircle.snp.trailing).offset(16)
+            $0.trailing.equalToSuperview().offset(-16)
+            $0.centerY.equalToSuperview()
+        }
+        
+        return view
+    }
+    
+    private func bindAction() {
+        incorrectButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                print("❌ 틀려요 클릭 - 현재 팝업 닫기")
+                self?.dismiss(animated: true)
+            })
+            .disposed(by: disposeBag)
+        
+        correctButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                print("✅ 맞아요 클릭 - 다음 플로우로 진행 (구현 예정)")
+            })
+            .disposed(by: disposeBag)
+    }
 }
