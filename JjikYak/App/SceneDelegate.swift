@@ -19,8 +19,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             
             // ✨ 이전에 있던 GeminiService 테스트 코드는 싹 다 지웠습니다!
             // 이제 앱이 켜지면 오직 카메라 실험실만 딱 띄웁니다.
-            let VC = TestCameraViewController()
-//            let VC = TabBarController()
+    //        let VC = TestCameraViewController()
+            let VC = TabBarController()
             window.rootViewController = VC
             
             window.makeKeyAndVisible()
