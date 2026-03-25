@@ -174,7 +174,7 @@ extension AddPillViewController: UIImagePickerControllerDelegate, UINavigationCo
             let recognizedStrings = observations.compactMap { $0.topCandidates(1).first?.string }
             var fullText = recognizedStrings.joined(separator: "\n")
             
-            // 🔒 [보안] 개인정보 마스킹
+            // [보안] 개인정보 마스킹
             let rrnPattern = "\\d{6}[- ]?\\d{7}"
             let phonePattern = "010[- ]?\\d{4}[- ]?\\d{4}"
             
@@ -196,10 +196,18 @@ extension AddPillViewController: UIImagePickerControllerDelegate, UINavigationCo
                         
                         // 1. 결과 화면 뷰 컨트롤러 생성 (데이터 넘겨주기)
                         let resultVC = ScanResultViewController(pillList: pillInfos)
-                        
-                        // 2. 화면 전환
-                        //                            self.navigationController?.pushViewController(resultVC, animated: true)
-                         self?.present(resultVC, animated: true)
+                        // 2. 맞아요 신호가 오면 실행될 코드
+                        resultVC.onConfirm = { [weak self] confirmedPills in
+                            print("약 확인 완료! 상세 설정 화면(Wizard)으로 이동합니다!")
+                            
+                            // 상세 설정 화면 뼈대를 생성하고 데이터를 넘겨줌
+                            let detailVC = AddPillDetailViewController(pillList: confirmedPills)
+                            detailVC.modalPresentationStyle = .fullScreen // 꽉 찬 화면으로 띄우기
+                            
+                            // 화면 전환
+                            self?.present(detailVC, animated: true)
+                        }
+                        self?.present(resultVC, animated: true)
                     case .failure(let error):
                         print("AI 분석 실패: \(error.localizedDescription)")
                     }
