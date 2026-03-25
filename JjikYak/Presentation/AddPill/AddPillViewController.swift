@@ -97,8 +97,10 @@ class AddPillViewController: UIViewController {
             .disposed(by: disposeBag)
         
         directAddButton.rx.controlEvent(.touchUpInside)
-            .subscribe(onNext: {
-                print("수동 등록 클릭됨 - 직접 입력 화면으로 이동")
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                let directAddVC = DirectAddViewController()
+                self.navigationController?.pushViewController(directAddVC, animated: true)
             })
             .disposed(by: disposeBag)
     }
