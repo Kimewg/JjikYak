@@ -8,6 +8,7 @@ class ScanResultViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     var pillList: [PillInfo] = []
+    var onConfirm: (([PillInfo]) -> Void)?
     
     // 뒷배경을 어둡게 만들어줄 투명 뷰
     private let dimView: UIView = {
@@ -198,7 +199,7 @@ class ScanResultViewController: UIViewController {
         }
     }
     
-    // 디자인 시안에 맞춘 개별 약 행(Row) 생성
+    // 개별 약 행(Row) 생성
     private func createPillRowView(index: Int, name: String) -> UIView {
         let view = UIView()
         view.layer.cornerRadius = 16
@@ -253,7 +254,12 @@ class ScanResultViewController: UIViewController {
         
         correctButton.rx.tap
             .subscribe(onNext: { [weak self] in
-                print("✅ 맞아요 클릭 - 다음 플로우로 진행 (구현 예정)")
+                            guard let self = self else { return }
+                            
+                            // 2. 팝업을 닫으면서(dismiss), 다음 화면으로 가라고 신호(onConfirm)를 보냅니다!
+                            self.dismiss(animated: true) {
+                                self.onConfirm?(self.pillList)
+                            }
             })
             .disposed(by: disposeBag)
     }
