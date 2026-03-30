@@ -39,13 +39,13 @@ class NotificationManager {
             content.body = "[\(title)] 드실 시간이에요! 잊지 말고 챙겨 드세요."
             content.sound = .default
             
-            // 매일 해당 시간에 울리도록 설정
+            //연, 월, 일, 시간, 분을 모두 추출하고 반복(repeats)을 false로 설정합니다.
             let calendar = Calendar.current
-            let components = calendar.dateComponents([.hour, .minute], from: time)
-            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+            let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: time)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
             
-            // 알림 고유 ID (나중에 개별 삭제할 때를 대비해 Pill의 ID나 이름을 사용)
-            let request = UNNotificationRequest(identifier: "PillNotification_\(title)", content: content, trigger: trigger)
+            // 알림 고유 ID
+            let request = UNNotificationRequest(identifier: "PillNotification_\(pill.id?.uuidString ?? title)", content: content, trigger: trigger)
             
             center.add(request) { error in
                 if let error = error {
